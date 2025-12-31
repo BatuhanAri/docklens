@@ -1,59 +1,75 @@
 # 🐳 DockLens
 
-DockLens is a Python-based CLI tool that performs **static analysis** on `docker-compose.yml` files and generates a structured **best-practice, risk, and quality report**.
+DockLens is a Python-based CLI tool for static analysis of `docker-compose.yml` files.  
+It detects best-practice violations, configuration risks, and reliability issues **before** they reach runtime or CI/CD pipelines.
 
-It helps developers and DevOps engineers detect Compose-level misconfigurations **early**, before they cause runtime incidents or CI/CD failures.
+## Quick Start
 
----
+This section walks you through installing DockLens and running your first analysis.
 
-## Why DockLens?
+### 1. Installation
 
-As Docker Compose files evolve, they tend to accumulate subtle but dangerous configuration issues such as:
-
-- unpinned images (`latest`)
-- unsafe host mounts
-- port collisions
-- fragile startup ordering
-- missing health checks
-
-DockLens analyzes Compose files **offline** and turns these risks into **clear, actionable findings**.
-
----
-
-## Features (v0.1.0)
-
-### Compose Parsing
-DockLens parses the following service attributes:
-
-- image
-- ports
-- volumes
-- network_mode
-- restart policy
-- environment variables
-- depends_on
-- healthcheck
-
-### Detection Rules
-DockLens detects and reports:
-
-- missing or `latest` image tags
-- privileged containers
-- usage of `network_mode: host`
-- host port collisions
-- sensitive host paths mounted without `:ro`
-- missing healthchecks
-- `depends_on` usage without health readiness guarantees
-
-### Output & Tooling
-- colored terminal summary
-- Markdown report
-- JSON report (machine-readable)
-- CI-friendly exit codes
-
----
-
-## Installation (local / development)
+Clone the repository and install DockLens in editable mode:
 
 ```bash
+git clone https://github.com/<your-username>/docklens.git
+cd docklens
+
+python3 -m venv .venv
+source .venv/bin/activate
+
 pip install -e .
+```
+### 2. Running DockLens
+Basic scan (terminal output only):
+
+```bash
+docklens docker-compose.yml
+
+```
+
+### 3. Example Output
+
+Terminal summary:
+
+    ERROR   PORT001  api,db   Host port collision
+    WARN    IMG002   api      Image tag is 'latest' or missing
+    WARN    VOL001   api      Critical host path mounted without :ro
+    INFO    HLT001   api      No healthcheck defined
+
+Generated artifacts:
+
+report.md — human-readable Markdown report
+report.json — machine-readable JSON output
+A deliberately misconfigured demo file is included:
+
+examples/docker-compose.sample.yml
+
+### 4. Exit Codes
+DockLens is designed for CI/CD usage.
+
+    0 → No errors found
+    2 → One or more ERROR-level findings
+
+Warnings and informational findings do not fail execution.
+
+### 5. Project Structure
+
+    docklens/
+    ├── docklens/
+    │   ├── cli.py          # CLI entry point
+    │   ├── parser.py       # Compose file parsing
+    │   ├── rules.py        # Rule definitions
+    │   └── report.py       # Markdown / JSON reporting
+    ├── tests/
+    ├── examples/
+    ├── pyproject.toml
+    └── README.md
+
+### 6. Roadmap
+Diff mode: docklens diff old.yml new.yml
+Additional security and reliability rules
+SARIF output for GitHub code scanning
+Rule severity configuration
+
+
