@@ -1,0 +1,14 @@
+services:
+  api:
+    image: myorg/api:latest
+    ports:
+      - "7000:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    ports:
+      - "7000:5432"
